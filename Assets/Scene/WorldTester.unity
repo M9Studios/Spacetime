@@ -2120,14 +2120,6 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   go_worldObject: {fileID: 2147158171}
-  xAdj: 40
-  yAdj: 25
-  xx: 0
-  yy: 0
-  lx: 0
-  ly: 0
-  worldInit: 0
-  localInit: 0
 --- !u!1001 &194139960
 Prefab:
   m_ObjectHideFlags: 0

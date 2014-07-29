@@ -46,10 +46,10 @@ public class WorldGenerator : MonoBehaviour {
 
 			newWorld = false;
 
-			if (player.GetComponent<MapBuilder>())
+			if (player.GetComponent<WorldBuilder>())
 			{
-				player.GetComponent<MapBuilder>().Initialised = true;
-				player.GetComponent<MapBuilder>().SetWorld = WorldBlock;
+				player.GetComponent<WorldBuilder>().Initialised = true;
+				player.GetComponent<WorldBuilder>().SetWorld = WorldBlock;
 			}
 		}
 	}
