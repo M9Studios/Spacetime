@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using M9Debug;
 
 public class WorldGenerator : MonoBehaviour {
 	
@@ -20,29 +21,23 @@ public class WorldGenerator : MonoBehaviour {
 			
 			t1 = Time.realtimeSinceStartup;
 			SpawnRandom();
-			Debug.Log("Stone spawn time: " + (Time.realtimeSinceStartup - t1));
+			M9Debugger.Log("Stone spawn time: " + (Time.realtimeSinceStartup - t1));
 			
 			for (int i = 0; i < 20; i++)
 			{
 				t1 = Time.realtimeSinceStartup;
 				SmoothWorld();
-				Debug.Log("Iteration " + i + " smooth time: " + (Time.realtimeSinceStartup - t1));
+				M9Debugger.Log("Iteration " + i + " smooth time: " + (Time.realtimeSinceStartup - t1));
 			}
 			
 			t1 = Time.realtimeSinceStartup;
 			SpawnOre();
-			Debug.Log("Ore spawn time: " + (Time.realtimeSinceStartup - t1));
+			M9Debugger.Log("Ore spawn time: " + (Time.realtimeSinceStartup - t1));
 			
 			t1 = Time.realtimeSinceStartup;
 			SpawnDirt();
-			Debug.Log("Dirt spawn time: " + (Time.realtimeSinceStartup - t1));
-			
-			/*
-			t1 = Time.realtimeSinceStartup;
-			CreateSpawnArea();
-			Debug.Log("Spawn area create time: " + (Time.realtimeSinceStartup - t1));
-			*/
-			
+			M9Debugger.Log("Dirt spawn time: " + (Time.realtimeSinceStartup - t1));
+						
 			newWorld = false;
 		}
 	}
@@ -129,40 +124,18 @@ public class WorldGenerator : MonoBehaviour {
 	private bool CheckStone (int x, int y)
 	{
 		if
-			(
-				WorldBlock[x-1, y+1] == (byte)BlockID.Stone || WorldBlock[x, y+1] == (byte)BlockID.Stone ||
-				WorldBlock[x+1, y+1] == (byte)BlockID.Stone || WorldBlock[x-1, y] == (byte)BlockID.Stone ||
-				WorldBlock[x+1, y] == (byte)BlockID.Stone || WorldBlock[x-1, y-1] == (byte)BlockID.Stone ||
-				WorldBlock[x, y-1] == (byte)BlockID.Stone || WorldBlock[x+1, y-1] == (byte)BlockID.Stone
-				)
-				return true;
+		(
+			WorldBlock[x-1, y+1] == (byte)BlockID.Stone || WorldBlock[x, y+1] == (byte)BlockID.Stone ||
+			WorldBlock[x+1, y+1] == (byte)BlockID.Stone || WorldBlock[x-1, y] == (byte)BlockID.Stone ||
+			WorldBlock[x+1, y] == (byte)BlockID.Stone || WorldBlock[x-1, y-1] == (byte)BlockID.Stone ||
+			WorldBlock[x, y-1] == (byte)BlockID.Stone || WorldBlock[x+1, y-1] == (byte)BlockID.Stone
+		)
+			return true;
 		else
 			return false;
 		
 	}
-	
-	/// Creates the spawn area.
-	private void CreateSpawnArea ()
-	{
-		short s1 = (short)(mapWidth/2 - chunkX/2);
-		short s2 = (short)(mapHeight/2 - chunkY/2);
 		
-		for (int x = s1; x < s1+chunkX; x++)
-		{
-			for (int y = s2; y < s2+chunkY; y++)
-			{
-				WorldBlock[x, y] = (byte)BlockID.Air;
-			}
-		}
-		
-		for (int x = s1; x < s1+chunkX; x++)
-		{
-			WorldBlock[x, s2+10] = (byte)BlockID.Stone;
-			WorldBlock[x, s2+20] = (byte)BlockID.Stone;
-			WorldBlock[x, s2+30] = (byte)BlockID.Stone;
-		}
-	}
-	
 	/// Run a single iteraion of smoothing on the world.
 	private void SmoothWorld ()
 	{
