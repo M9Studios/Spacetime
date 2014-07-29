@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class MapBuilder : MonoBehaviour {
+public class WorldBuilder : MonoBehaviour {
 	
 	public GameObject[] go_blocks = new GameObject[byte.MaxValue];
 	public GameObject go_worldObject;
