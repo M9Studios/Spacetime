@@ -36,15 +36,9 @@ public class PointLight2D : MonoBehaviour {
 
 				d = Mathf.RoundToInt(Mathf.Sqrt((xd*xd)+(yd*yd)));
 
-				if (c2d[i].GetComponent<Block2D>().LightExists(light))
-				{
-					c2d[i].GetComponent<Block2D>().RunLightingUpdate(d, light);
-				}
-				else
-				{
-					c2d[i].GetComponent<Block2D>().AddLight(light);
-					c2d[i].GetComponent<Block2D>().RunLightingUpdate(d, light);
-				}
+				if (!c2d[i].GetComponent<Block2D>().LightExists(light)) c2d[i].GetComponent<Block2D>().AddLight(light);
+
+				c2d[i].GetComponent<Block2D>().SetLightValue(d, light);
 			}
 		}
 		#endregion
