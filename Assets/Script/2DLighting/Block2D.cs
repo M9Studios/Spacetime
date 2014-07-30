@@ -15,14 +15,18 @@ public class Block2D : MonoBehaviour {
 	{
 		SetLightValue(i1, light);
 		ApplyHighestLightValue();
+
 	}
 
 	public void SetLightValue (int i1, Light2D light)
 	{
 		for (int i = 0; i < lights.Length; i++)
 		{
-			lights[i].lightValue = 1-(float)i1/(float)lights[i].range;
-			lightValues[i] = lights[i].lightValue;
+			if (lights[i].lightID == light.lightID)
+			{
+				lights[i].lightValue = 1-(float)i1/(float)lights[i].range;
+				lightValues[i] = lights[i].lightValue;
+			}
 		}
 	}
 
@@ -30,12 +34,11 @@ public class Block2D : MonoBehaviour {
 	{
 		for (int i = 0; i < lightValues.Length; i++)
 		{
-			if (lightValues[i] < nv)
+			if (lightValues[i] > nv)
 			{
 				nv = lightValues[i];
 			}
 		}
-
 		renderer.material.SetColor("_Color", new Color(nv, nv, nv));
 	}
 
