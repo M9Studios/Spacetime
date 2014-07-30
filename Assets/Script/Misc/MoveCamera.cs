@@ -1,9 +1,11 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+[AddComponentMenu("Spacetime/Utilities/MoveCamera")]
+
 public class MoveCamera : MonoBehaviour {
 
-	void Update ()
+	private void Update ()
 	{
 		if (Input.GetKey(KeyCode.W)) transform.Translate(new Vector2(0, 5F * Time.deltaTime));
 		if (Input.GetKey(KeyCode.S)) transform.Translate(new Vector2(0, -5F * Time.deltaTime));
