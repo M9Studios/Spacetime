@@ -29,10 +29,8 @@ public class PointLight2D : MonoBehaviour {
 			changeLight = true;
 		}
 
-		// Get collider of every GameObject within radius of _range.
 		c2d = Physics2D.OverlapCircleAll(new Vector2(transform.position.x, transform.position.y), light.range);
 		
-		// For every collider calculate the distance between the light and the block.
 		for (int i = 0; i < c2d.Length; i++)
 		{
 			if (c2d[i].GetComponent<Block2D>() != null)

@@ -19,7 +19,8 @@ public class Block2D : MonoBehaviour {
 
 	public void RunLightingUpdate ()
 	{
-		ApplyHighestLightValue();
+		//ApplyHighestLightValue();
+		MultiplyLightValues();
 	}
 
 	public void SetLightValue (Light2D light, int i1)
@@ -32,6 +33,21 @@ public class Block2D : MonoBehaviour {
 				lightValues[i] = lights[i].lightValue;
 			}
 		}
+	}
+
+	private void MultiplyLightValues ()
+	{
+		hv = 0;
+
+		for (int i = 0; i < lightValues.Length; i++)
+		{
+			if (lightValues[i] > 0)
+			{
+				hv += lightValues[i];
+			}
+		}
+
+		renderer.material.SetColor("_Color", new Color(hv, hv, hv));
 	}
 
 	private void ApplyHighestLightValue ()

@@ -51,10 +51,8 @@ public class SpotLight2D : MonoBehaviour {
 
 					xd = c2d[i].transform.position.x - transform.position.x;
 					yd = c2d[i].transform.position.y - transform.position.y;
-					xd = xd*xd;
-					yd = yd*yd;
 
-					d = Mathf.RoundToInt(Mathf.Sqrt(xd+yd));
+					d = Mathf.RoundToInt(Mathf.Sqrt(xd*xd)+(yd*yd));
 
 					if (!c2d[i].GetComponent<Block2D>().LightExists(light)) c2d[i].GetComponent<Block2D>().AddLight(light);
 
