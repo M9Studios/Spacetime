@@ -8,13 +8,13 @@ public class Block2D : MonoBehaviour {
 	private const int MAX_LIGHTS = Lighting2D.MAX_DISPLAY_LIGHTS;
 	private const float UPDATE_TIME = Lighting2D.LIGHTING_UPDATE_TIME;
 
-	public Light2D[] lights = new Light2D[MAX_LIGHTS];
+	private Light2D[] lights = new Light2D[MAX_LIGHTS];
 	public float[] lightValues = new float[MAX_LIGHTS];
-	public float hv = 0;
+	private float hv = 0;
 
 	private void Start ()
 	{
-		InvokeRepeating("RunLightingUpdate", UPDATE_TIME, UPDATE_TIME);
+		InvokeRepeating("RunLightingUpdate", 0.1F, 0.1F);
 	}
 
 	public void RunLightingUpdate ()
@@ -22,7 +22,7 @@ public class Block2D : MonoBehaviour {
 		ApplyHighestLightValue();
 	}
 
-	public void SetLightValue (int i1, Light2D light)
+	public void SetLightValue (Light2D light, int i1)
 	{
 		for (int i = 0; i < lights.Length; i++)
 		{
@@ -61,7 +61,7 @@ public class Block2D : MonoBehaviour {
 		}
 	}
 
-	public void ChangeLight (int id, Light2D light)
+	public void ChangeLight (Light2D light, int id)
 	{
 		for (int i = 0; i < lights.Length; i++)
 		{

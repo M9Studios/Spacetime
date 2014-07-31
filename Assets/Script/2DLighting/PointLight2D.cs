@@ -39,7 +39,7 @@ public class PointLight2D : MonoBehaviour {
 			{
 				if (changeLight)
 				{
-					c2d[i].GetComponent<Block2D>().ChangeLight(light.lightID, light);
+					c2d[i].GetComponent<Block2D>().ChangeLight(light, light.lightID);
 					changeLight = false;
 				}
 
@@ -50,7 +50,7 @@ public class PointLight2D : MonoBehaviour {
 
 				if (!c2d[i].GetComponent<Block2D>().LightExists(light)) c2d[i].GetComponent<Block2D>().AddLight(light);
 
-				c2d[i].GetComponent<Block2D>().SetLightValue(d, light);
+				c2d[i].GetComponent<Block2D>().SetLightValue(light, d);
 			}
 		}
 	}
