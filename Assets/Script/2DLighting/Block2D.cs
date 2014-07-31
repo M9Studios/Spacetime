@@ -11,17 +11,15 @@ public class Block2D : MonoBehaviour {
 	public Light2D[] lights = new Light2D[MAX_LIGHTS];
 	public float[] lightValues = new float[MAX_LIGHTS];
 	public float hv = 0;
-	public float mv = 0;
 
 	private void Start ()
 	{
-		InvokeRepeating("RunLightingUpdate", 0.25F, 0.25F);
+		InvokeRepeating("RunLightingUpdate", UPDATE_TIME, UPDATE_TIME);
 	}
 
 	public void RunLightingUpdate ()
 	{
 		ApplyHighestLightValue();
-		MinimiseLightValue();
 	}
 
 	public void SetLightValue (int i1, Light2D light)
@@ -39,6 +37,7 @@ public class Block2D : MonoBehaviour {
 	private void ApplyHighestLightValue ()
 	{
 		hv = 0;
+
 		for (int i = 0; i < lightValues.Length; i++)
 		{
 			if (lightValues[i] > hv)
@@ -46,20 +45,8 @@ public class Block2D : MonoBehaviour {
 				hv = lightValues[i];
 			}
 		}
-		renderer.material.SetColor("_Color", new Color(hv, hv, hv));
-	}
 
-	private void MinimiseLightValue ()
-	{
-		mv = 0;
-		for (int i = 0; i < lightValues.Length; i++)
-		{
-			if (lightValues[i] > mv)
-			{
-				mv = lightValues[i];
-			}
-		}
-		renderer.material.SetColor("_Color", new Color(mv, mv, mv));
+		renderer.material.SetColor("_Color", new Color(hv, hv, hv));
 	}
 
 	public void AddLight (Light2D light)
@@ -74,6 +61,17 @@ public class Block2D : MonoBehaviour {
 		}
 	}
 
+	public void ChangeLight (int id, Light2D light)
+	{
+		for (int i = 0; i < lights.Length; i++)
+		{
+			if (lights[i].lightID == id)
+			{
+				lights[i].range = light.range;
+			}
+		}
+	}
+
 	public void RemoveLight (Light2D light)
 	{
 		for (int i = 0; i < lights.Length; i++)
@@ -82,9 +80,14 @@ public class Block2D : MonoBehaviour {
 			{
 				lights[i].lightID = 0;
 				lights[i].range = 0;
+				lights[i].lightValue = 0;
+				lightValues[i] = 0;
+				hv = 0;
 				return;
 			}
 		}
+
+		ApplyHighestLightValue();
 	}
 
 	public bool LightExists (Light2D light)
