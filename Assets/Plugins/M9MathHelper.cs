@@ -43,18 +43,6 @@ namespace M9MathHelper {
 			if ((left) && (up))
 				a = Mathf.Atan((xd/yd))*conversionFactor + W;
 
-			/*
-			M9Debugger.Log("left: " + left);
-			M9Debugger.Log("right: " + right);
-			M9Debugger.Log("up: " + up);
-			M9Debugger.Log("down: " + down);
-
-			M9Debugger.Log("light pos: " + v1);
-			M9Debugger.Log("block pos: " + v2);
-
-			M9Debugger.Log("angle: " + a);
-			*/
-
 			return a;
 		}
 
