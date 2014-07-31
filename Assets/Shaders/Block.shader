@@ -1,4 +1,4 @@
-﻿Shader "M9Lighting/Diffuse"
+﻿Shader "M9Lighting2D/Diffuse"
 {
 	Properties
 	{
