@@ -7,8 +7,8 @@ public class WorldBuilder : MonoBehaviour {
 	public GameObject go_worldObject;
 
 	private GameObject[,] go_objectBlock = new GameObject[WorldInformation.MAP_WIDTH, WorldInformation.MAP_HEIGHT];
-	private byte xAdj = 40;
-	private byte yAdj = 25;
+	private byte xAdj = WorldInformation.X_ADJUST;
+	private byte yAdj = WorldInformation.Y_ADJUST;
 	private int xx = 0, yy = 0, lx = 0, ly = 0;
 	private byte[,] LocalBlock = new byte[WorldInformation.MAP_WIDTH, WorldInformation.MAP_HEIGHT];
 	private bool worldInit = false;
