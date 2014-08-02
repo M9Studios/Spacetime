@@ -13,7 +13,7 @@ namespace M9MathHelper {
 		private static float xd, yd;
 		private static float a;
 
-		public static float Vector2Angle (Vector2 v1, Vector2 v2)
+		public static float GetAngle (Vector2 v1, Vector2 v2)
 		{
 			left = false; right = false;
 			up = false; down = false;
