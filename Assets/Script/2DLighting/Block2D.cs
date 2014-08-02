@@ -1,135 +1,118 @@
 ﻿using UnityEngine;
 using M9Debug;
+using System.Collections.Generic;
 
-[AddComponentMenu("Spacetime/Lighting2D/Block2D")]
-
+[AddComponentMenu("Lighting2D/Block2D")]
 public class Block2D : MonoBehaviour {
 
-	private const int MAX_LIGHTS = Lighting2D.MAX_DISPLAY_LIGHTS;
-	private const float UPDATE_TIME = Lighting2D.LIGHTING_UPDATE_TIME;
+	private float updateTime = Lighting2D.LIGHTING_UPDATE_TIME;
 
-	private Light2D[] lights = new Light2D[MAX_LIGHTS];
-	public float[] lightValues = new float[MAX_LIGHTS];
-	private float hv = 0;
+	private List<GameObject> trackedLights = new List<GameObject>();
 
-	private void Start ()
+	private List<Light2D._Light2D> lights = new List<Light2D._Light2D>();
+
+	public List<float> newValues = new List<float>();
+	public List<float> oldValues = new List<float>();
+
+	public float newValue = 0.0F;
+	public float oldValue = 0.0F;
+
+	public void Start ()
 	{
-		InvokeRepeating("RunLightingUpdate", 0.1F, 0.1F);
+		InvokeRepeating("UpdateLighting", updateTime, 0.1F);
 	}
 
-	public void RunLightingUpdate ()
+	private void UpdateLighting ()
 	{
 		//ApplyHighestLightValue();
-		MultiplyLightValues();
+		ApplyAdditiveLightValue();
+
+		if (oldValue != newValue)
+		{
+			renderer.material.SetColor("_Color", new Color(newValue, newValue, newValue));
+
+			oldValue = newValue;
+		}
 	}
 
-	public void SetLightValue (Light2D light, int i1)
+	private void ApplyAdditiveLightValue ()
 	{
-		for (int i = 0; i < lights.Length; i++)
+		newValue = 0.0F;
+
+		for (int i = 0; i < newValues.Count; i++)
 		{
-			if (lights[i].lightID == light.lightID)
+			if (newValues[i] > 0)
 			{
-				lights[i].lightValue = 1-(float)i1/(float)lights[i].range;
-				lightValues[i] = lights[i].lightValue;
+				newValue += newValues[i];
 			}
 		}
 	}
 
-	private void MultiplyLightValues ()
+	private void ApplyHighestLightValue () // Simple highest value = light value method.
 	{
-		hv = 0;
+		newValue = 0.0F;
 
-		for (int i = 0; i < lightValues.Length; i++)
+		foreach(float f in newValues)
 		{
-			if (lightValues[i] > 0)
+			if (f > newValue)
 			{
-				hv += lightValues[i];
-			}
-		}
-
-		renderer.material.SetColor("_Color", new Color(hv, hv, hv));
-	}
-
-	private void ApplyHighestLightValue ()
-	{
-		hv = 0;
-
-		for (int i = 0; i < lightValues.Length; i++)
-		{
-			if (lightValues[i] > hv)
-			{
-				hv = lightValues[i];
-			}
-		}
-
-		renderer.material.SetColor("_Color", new Color(hv, hv, hv));
-	}
-
-	public void AddLight (Light2D light)
-	{
-		for (int i = 0; i < lights.Length; i++)
-		{
-			if (lights[i].lightID == 0)
-			{
-				lights[i] = light;
-				return;
+				newValue = f;
 			}
 		}
 	}
 
-	public void ChangeLight (Light2D light, int id)
+	public void SetLightValue (int i1, int i2)
 	{
-		for (int i = 0; i < lights.Length; i++)
+		int i = 0;
+
+		foreach(Light2D._Light2D l in lights)
 		{
-			if (lights[i].lightID == id)
+			if (l._lightID == i1)
 			{
-				lights[i].range = light.range;
+				newValues[i] = 1 - (float)i2/(float)lights[i]._range;
 			}
+			i++;
 		}
 	}
 
-	public void RemoveLight (Light2D light)
+	public void AddLight (Light2D._Light2D light)
 	{
-		for (int i = 0; i < lights.Length; i++)
-		{
-			if (lights[i].lightID == light.lightID)
-			{
-				lights[i].lightID = 0;
-				lights[i].range = 0;
-				lights[i].lightValue = 0;
-				lightValues[i] = 0;
-				hv = 0;
-				return;
-			}
-		}
-
-		ApplyHighestLightValue();
+		lights.Add(light);
+		newValues.Add(0.0F);
+		oldValues.Add(0.0F);
 	}
 
-	public bool LightExists (Light2D light)
+	public void RemoveLight (int i1)
 	{
-		for (int i = 0; i < lights.Length; i++)
+		if (lights.Count > 0)
 		{
-			if (lights[i].lightID == light.lightID)
+			for (int i = 0; i < lights.Count; i++)
 			{
-				return true;
+				if (lights[i]._lightID == i1)
+				{
+					lights.RemoveAt(i);
+					newValues.RemoveAt(i);
+					oldValues.RemoveAt(i);
+					return;
+				}
 			}
 		}
+		else
+		{
+			M9Debugger.LogWarning("No lights to remove.");
+			return;
+		}
 
+		M9Debugger.LogWarning("Attempt to remove light " + i1 + " failed.");
+	}
+
+	public bool LightExists (int i1)
+	{
+		foreach (Light2D._Light2D l in lights)
+		{
+			if (l._lightID == i1) return true;
+		}
 		return false;
-	}
-
-	public float GetLightValue (Light2D light)
-	{
-		for (int i = 0; i < lights.Length; i++)
-		{
-			if (lights[i].lightID == light.lightID)
-			{
-				return lights[i].lightValue;
-			}
-		}
-
-		return -1;
 	}
 
 }
