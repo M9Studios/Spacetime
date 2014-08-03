@@ -8,29 +8,25 @@ public class Block2D : MonoBehaviour {
 	private float updateTime = Lighting2D.LIGHTING_UPDATE_TIME;
 
 	private List<GameObject> trackedLights = new List<GameObject>();
-
 	private List<Light2D._Light2D> lights = new List<Light2D._Light2D>();
+	private List<float> newValues = new List<float>();
 
-	public List<float> newValues = new List<float>();
-	public List<float> oldValues = new List<float>();
-
-	public float newValue = 0.0F;
-	public float oldValue = 0.0F;
+	private float newValue = 0.0F;
+	private float oldValue = 0.0F;
 
 	public void Start ()
 	{
-		InvokeRepeating("UpdateLighting", updateTime, 0.1F);
+		InvokeRepeating("UpdateLighting", updateTime, updateTime);
 	}
 
 	private void UpdateLighting ()
 	{
-		//ApplyHighestLightValue();
 		ApplyAdditiveLightValue();
+		CheckTrackedLights();
 
 		if (oldValue != newValue)
 		{
 			renderer.material.SetColor("_Color", new Color(newValue, newValue, newValue));
-
 			oldValue = newValue;
 		}
 	}
@@ -61,6 +57,31 @@ public class Block2D : MonoBehaviour {
 		}
 	}
 
+	private void CheckTrackedLights ()
+	{
+		for (int i = 0; i < trackedLights.Count; i++)
+		{
+			if (trackedLights[i] != null)
+			{
+				if (lights[i] != null)
+				{
+					float x, y, a, b, r;
+
+					r = lights[i]._range;
+					a = transform.position.x;
+					b = transform.position.y;
+					x = trackedLights[i].transform.position.x-1.01F;
+					y = trackedLights[i].transform.position.y-1.01F;
+
+					if (((x-a)*(x-a))+((y-b)*(y-b)) > ((r*r)))
+					{
+						RemoveLight(lights[i]._lightID);
+					}
+				}
+			}
+		}
+	}
+
 	public void SetLightValue (int i1, int i2)
 	{
 		int i = 0;
@@ -78,8 +99,15 @@ public class Block2D : MonoBehaviour {
 	public void AddLight (Light2D._Light2D light)
 	{
 		lights.Add(light);
+		trackedLights.Add(null);
 		newValues.Add(0.0F);
-		oldValues.Add(0.0F);
+	}
+
+	public void AddLight (Light2D._Light2D light, GameObject go)
+	{
+		lights.Add(light);
+		trackedLights.Add(go);
+		newValues.Add(0.0F);
 	}
 
 	public void RemoveLight (int i1)
@@ -91,8 +119,13 @@ public class Block2D : MonoBehaviour {
 				if (lights[i]._lightID == i1)
 				{
 					lights.RemoveAt(i);
+	
+					if (trackedLights[i] != null)
+					{
+						trackedLights.RemoveAt(i);
+					}
+
 					newValues.RemoveAt(i);
-					oldValues.RemoveAt(i);
 					return;
 				}
 			}

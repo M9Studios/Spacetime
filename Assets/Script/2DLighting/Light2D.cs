@@ -248,7 +248,7 @@ public class Light2D : MonoBehaviour
 
 					if (!block.LightExists(light2D._lightID))
 					{
-						block.AddLight(light2D);
+						block.AddLight(light2D, gameObject);
 					}
 
 					block.SetLightValue(light2D._lightID, d);
@@ -335,7 +335,7 @@ public class Light2D : MonoBehaviour
 						
 						if (!block.LightExists(light2D._lightID))
 						{
-							block.AddLight(light2D);
+							block.AddLight(light2D, gameObject);
 						}
 						
 						block.SetLightValue(light2D._lightID, d);
@@ -346,7 +346,7 @@ public class Light2D : MonoBehaviour
 						
 						if (!block.LightExists(light2D._lightID))
 						{
-							block.AddLight(light2D);
+							block.AddLight(light2D, gameObject);
 						}
 						
 						block.SetLightValue(light2D._lightID, light2D._range);
