@@ -1,5 +1,5 @@
-﻿public class Item : IItem {
-	
+﻿public class Item : IItem
+{
 	private short _itemID;
 	private string _name;
 	private string _description;

@@ -1,5 +1,5 @@
-﻿public class Block : IBlock {
-
+﻿public class Block : IBlock
+{
 	private BlockID _blockID;
 	private string _name;
 	private string _description;

@@ -5,11 +5,46 @@ public class CharacterScript : MonoBehaviour {
 
 	public bool noclip = true;
 
-	void Update ()
+	private void Start ()
+	{
+		//CreateMesh();
+		if (noclip)
+		{
+			if (rigidbody2D != null)
+			{
+				rigidbody2D.isKinematic = true;
+			}
+			if (rigidbody != null)
+			{
+				rigidbody.isKinematic = true;
+			}
+		}
+		else
+		{
+			if (rigidbody2D != null)
+			{
+				rigidbody2D.isKinematic = false;
+			}
+			if (rigidbody != null)
+			{
+				rigidbody.isKinematic = false;
+			}
+		}
+	}
+
+	private void Update ()
 	{
 		if (noclip)
 		{
-			rigidbody2D.isKinematic = true;
+			if (rigidbody2D != null)
+			{
+				rigidbody2D.isKinematic = true;
+			}
+			if (rigidbody != null)
+			{
+				rigidbody.isKinematic = true;
+			}
+
 			if (Input.GetKey(KeyCode.W))
 			{
 				transform.Translate(new Vector2(0, 5F * Time.deltaTime));
@@ -31,7 +66,15 @@ public class CharacterScript : MonoBehaviour {
 		}
 		else
 		{
-			rigidbody2D.isKinematic = false;
+			if (rigidbody2D != null)
+			{
+				rigidbody2D.isKinematic = false;
+			}
+			if (rigidbody != null)
+			{
+				rigidbody.isKinematic = false;
+			}
+
 			if (Input.GetKey(KeyCode.A))
 			{
 				transform.localScale = new Vector3(1.0F, 1.0F, 1.0F);
@@ -44,8 +87,16 @@ public class CharacterScript : MonoBehaviour {
 			}
 			if (Input.GetKeyDown(KeyCode.Space))
 			{
-				rigidbody2D.AddForce(Vector2.up*45250.0F);
+				if (rigidbody2D != null)
+				{
+					rigidbody2D.AddForce(Vector2.up*45250.0F);
+				}
+				if (rigidbody != null)
+				{
+					rigidbody.AddForce(Vector3.up*45250.0F);
+				}
 			}
 		}
 	}
+
 }

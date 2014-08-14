@@ -5,6 +5,9 @@ public class WorldBuilder : MonoBehaviour {
 	
 	public GameObject[] go_blocks = new GameObject[byte.MaxValue];
 	public GameObject go_worldObject;
+	
+	private short mapWidth = WorldInformation.MAP_WIDTH;
+	private short mapHeight = WorldInformation.MAP_HEIGHT;
 
 	private GameObject[,] go_objectBlock = new GameObject[WorldInformation.MAP_WIDTH, WorldInformation.MAP_HEIGHT];
 	private byte xAdj = WorldInformation.X_ADJUST;
@@ -35,7 +38,7 @@ public class WorldBuilder : MonoBehaviour {
 		{
 			for (int y = yy-yAdj; y < yy+yAdj; y++)
 			{
-				if (x > 0 && y > 0)
+				if ((x > 0) && (y > 0) && (x < mapWidth) && (y < mapHeight))
 				{
 					if (LocalBlock[x, y] != (byte)BlockID.Air)
 					{
@@ -87,9 +90,9 @@ public class WorldBuilder : MonoBehaviour {
 		}
 	}
 	
-	public void ChangeBlock (float x, float y, byte b)
+	public void ChangeBlock (float x, float y)
 	{
-		LocalBlock[(int)x, (int)y] = b;
+		LocalBlock[(int)x, (int)y] = (byte)BlockID.Air;
 	}
 	
 	public bool Initialised

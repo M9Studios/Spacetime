@@ -969,17 +969,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f1e7d1310058e0b4bbd3d63c7b4c7555, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  aMin: 0
+  aMax: 0
+  a: 0
   is2D: 0
   lightType: 0
   lightID: 0
-  range: 6
+  range: 10
   intensity: 1
   colour: {r: 1, g: 1, b: 1, a: 0}
   angle: 0
   isStatic: 0
-  aMin: 0
-  aMax: 0
-  a: 0
 --- !u!1 &2147158171
 GameObject:
   m_ObjectHideFlags: 0

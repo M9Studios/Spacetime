@@ -2,6 +2,7 @@ using UnityEngine;
 using M9Debug;
 using M9MathHelper;
 
+[AddComponentMenu("Lighting2D/Light2D")]
 public class Light2D : MonoBehaviour
 {
 	public enum LightType2D
@@ -13,13 +14,13 @@ public class Light2D : MonoBehaviour
 
 	public class _Light2D
 	{
-		public LightType2D _lightType;
-		public int _lightID;
-		public int _range;
-		public float _intensity;
-		public Color _colour;
-		public float _angle;
-		public bool _isStatic;
+		public LightType2D	_lightType;
+		public int			_lightID;
+		public int			_range;
+		public float		_intensity;
+		public Color		_colour;
+		public float		_angle;
+		public bool			_isStatic;
 
 		public _Light2D (LightType2D l1, int i1, int i2, float f1, Color c1, bool b1) // Pointlight constructor.
 		{
@@ -44,23 +45,27 @@ public class Light2D : MonoBehaviour
 		}
 	}
 
-	private _Light2D light2D;
 
-	public LightType2D lightType;
+	private float		updateTime = Lighting2D.LIGHTING_UPDATE_TIME;
+	private _Light2D	light2D;
+	private bool		lightAdded = false;
+	
+	public float		aMin,
+						aMax,
+						a;
+
+	public bool			is2D = false;
+	public LightType2D	lightType;
 	[HideInInspector]
-	public int lightID;
-	public int range;
-	public float intensity;
-	public Color colour;
-	public float angle;
-	public bool isStatic;
+	public int			lightID;
+	public int			range;
+	public float		intensity;
+	public Color		colour;
+	public float		angle;
+	public bool			isStatic;
 
-	private bool lightAdded = false;
 
-	private float updateTime = Lighting2D.LIGHTING_UPDATE_TIME;
-
-	public float aMin, aMax, a;
-
+	#region Unity functions.
 	private void Start ()
 	{
 		lightID = this.GetInstanceID();
@@ -107,31 +112,31 @@ public class Light2D : MonoBehaviour
 
 	private void OnDisable ()
 	{
-		if (light2D._lightType == LightType2D.Point)
+		if (light2D._isStatic)
 		{
-			if (light2D._isStatic)
+			RemoveStaticLight();
+		}
+		else
+		{
+			if ((light2D._lightType == LightType2D.Point) || (light2D._lightType == LightType2D.Spot))
 			{
-				RemoveStaticPointLight();
+				RemoveDynamicLight();
+			}
+			else if (light2D._lightType == LightType2D.UNIMPLEMENTED)
+			{
+				M9Debugger.Log("Attempting to remove unimplemented light.");
 			}
 			else
 			{
-				// Implement me.
+				M9Debugger.Log("Attempting to remove non-existent light.");
 			}
 		}
 
-		if (light2D._lightType == LightType2D.Spot)
-		{
-			if (light2D._isStatic)
-			{
-				RemoveStaticSpotLight();
-			}
-			else
-			{
-				// Implement me.
-			}
-		}
 	}
+	#endregion
 
+
+	#region Unity editor functions.
 	private void CheckEditorChanges ()
 	{
 		bool updateLight = false;
@@ -143,12 +148,15 @@ public class Light2D : MonoBehaviour
 
 		if ((updateLight) && (!light2D._isStatic))
 		{
-			M9Debugger.Log("Reconstructing light: " + lightID + " at x=" + transform.position.x + " y=" + transform.position.y);
+			M9Debugger.Log("Reconstructing light: " + lightID + " at x: " + transform.position.x + " y: " + transform.position.y);
 			if (lightType == LightType2D.Point) light2D = new _Light2D(lightType, lightID, range, intensity, colour, isStatic);
 			if (lightType == LightType2D.Spot) light2D = new _Light2D(lightType, lightID, range, intensity, colour, angle, isStatic);
 		}
 	}
+	#endregion
 
+
+	#region Apply lighting.
 	private void UpdateLighting ()
 	{
 		if (light2D._lightType == LightType2D.Point)
@@ -184,176 +192,286 @@ public class Light2D : MonoBehaviour
 			M9Debugger.LogWarning("UNIMPLEMENTED light mode in use, please switch the LightType in the inspector.");
 		}
 	}
+	#endregion
 
+
+	#region Point light.
 	private void AddStaticPointLight ()
 	{
-		Collider2D[] c2d = Physics2D.OverlapCircleAll(new Vector2(transform.position.x, transform.position.y), light2D._range);
-		
-		if (c2d.Length > 0)
+		M9Debugger.Log("Adding static point light " + light2D._lightID + " at x: " + transform.position.x + " y: " + transform.position.y);
+
+		if (is2D)
 		{
-			for (int i = 0; i < c2d.Length; i++)
+			Collider2D[] c2d = Physics2D.OverlapCircleAll(new Vector2(transform.position.x, transform.position.y), light2D._range);
+			
+			if (c2d.Length > 0)
 			{
-				if (c2d[i].GetComponent<Block2D>() != null)
-				{
-					Block2D block = c2d[i].GetComponent<Block2D>();
-					
-					float xd = c2d[i].transform.position.x - transform.position.x;
-					float yd = c2d[i].transform.position.y - transform.position.y;
-					int d = Mathf.RoundToInt(Mathf.Sqrt((xd*xd)+(yd*yd)));
-					
-					if (!block.LightExists(light2D._lightID))
-					{
-						block.AddLight(light2D);
-					}
-					
-					block.SetLightValue(light2D._lightID, d);
-				}
+				ApplyPointLight(c2d);
+			}
+		}
+		else
+		{
+			Collider[] c = Physics.OverlapSphere(new Vector3(transform.position.x, transform.position.y, 0), light2D._range);
+			
+			if (c.Length > 0)
+			{
+				ApplyPointLight(c);
 			}
 		}
 
 		lightAdded = true;
 	}
 
-	private void RemoveStaticPointLight ()
-	{
-		M9Debugger.Log("Removing light " + light2D._lightID + " from scene.");
-
-		Collider2D[] c2d = Physics2D.OverlapCircleAll(new Vector2(transform.position.x, transform.position.y), light2D._range);
-		
-		for (int i = 0; i < c2d.Length; i++)
-		{
-			if (c2d[i].GetComponent<Block2D>() != null)
-			{
-				c2d[i].GetComponent<Block2D>().SetLightValue(light2D._lightID, light2D._range);
-				c2d[i].GetComponent<Block2D>().RemoveLight(light2D._lightID);
-			}
-		}
-	}
-	
 	private void UpdateLightingPoint ()
 	{
-		Collider2D[] c2d = Physics2D.OverlapCircleAll(new Vector2(transform.position.x, transform.position.y), light2D._range);
-
-		if (c2d.Length > 0)
+		if (is2D)
 		{
-			for (int i = 0; i < c2d.Length; i++)
+			Collider2D[] c2d = Physics2D.OverlapCircleAll(new Vector2(transform.position.x, transform.position.y), light2D._range);
+			
+			if (c2d.Length > 0)
 			{
-				if (c2d[i].GetComponent<Block2D>() != null)
-				{
-					Block2D block = c2d[i].GetComponent<Block2D>();
-
-					float xd = c2d[i].transform.position.x - transform.position.x;
-					float yd = c2d[i].transform.position.y - transform.position.y;
-					int d = Mathf.RoundToInt(Mathf.Sqrt((xd*xd)+(yd*yd)));
-
-					if (!block.LightExists(light2D._lightID))
-					{
-						block.AddLight(light2D, gameObject);
-					}
-
-					block.SetLightValue(light2D._lightID, d);
-				}
+				ApplyPointLight(c2d);
+			}
+		}
+		else
+		{
+			Collider[] c = Physics.OverlapSphere(new Vector3(transform.position.x, transform.position.y, 0), light2D._range);
+			
+			if (c.Length > 0)
+			{
+				ApplyPointLight(c);
 			}
 		}
 	}
+	#endregion
 
+
+	#region Spot light.
 	private void AddStaticSpotLight ()
 	{
-		Collider2D[] c2d = Physics2D.OverlapCircleAll(new Vector2(transform.position.x, transform.position.y), light2D._range);
-		
-		if (c2d.Length > 0)
+		M9Debugger.Log("Adding static spot light " + light2D._lightID + " at x: " + transform.position.x + " y: " + transform.position.y);
+
+		if (is2D)
 		{
-			aMin = transform.rotation.eulerAngles.z - angle;
-			aMax = transform.rotation.eulerAngles.z + angle;
-			
-			for (int i = 0; i < c2d.Length; i++)
+			Collider2D[] c2d = Physics2D.OverlapCircleAll(new Vector2(transform.position.x, transform.position.y), light2D._range);
+
+			if (c2d.Length > 0)
 			{
-				if (c2d[i].GetComponent<Block2D>() != null)
-				{
-					//angle between light and block
-					a = M9AngleHelper.GetAngle(new Vector2(transform.position.x, transform.position.y), new Vector2(c2d[i].transform.position.x, c2d[i].transform.position.y));
-					
-					if ((a > aMin) && (a < aMax))
-					{
-						Block2D block = c2d[i].GetComponent<Block2D>();
-						float xd = c2d[i].transform.position.x - transform.position.x;
-						float yd = c2d[i].transform.position.y - transform.position.y;
-						int d = Mathf.RoundToInt(Mathf.Sqrt((xd*xd)+(yd*yd)));
-						
-						if (!block.LightExists(light2D._lightID))
-						{
-							block.AddLight(light2D);
-						}
-						
-						block.SetLightValue(light2D._lightID, d);
-					}
-				}
+				ApplySpotLight(c2d);
+			}
+		}
+		else
+		{
+			Collider[] c = Physics.OverlapSphere(new Vector3(transform.position.x, transform.position.y, 0), light2D._range);
+
+			if (c.Length > 0)
+			{
+				ApplySpotLight(c);
 			}
 		}
 
 		lightAdded = true;
-	}
-	
-	private void RemoveStaticSpotLight ()
-	{
-		M9Debugger.Log("Removing light " + light2D._lightID + " from scene.");
-
-		Collider2D[] c2d = Physics2D.OverlapCircleAll(new Vector2(transform.position.x, transform.position.y), light2D._range);
-		
-		for (int i = 0; i < c2d.Length; i++)
-		{
-			if (c2d[i].GetComponent<Block2D>() != null)
-			{
-				c2d[i].GetComponent<Block2D>().SetLightValue(light2D._lightID, light2D._range);
-				c2d[i].GetComponent<Block2D>().RemoveLight(light2D._lightID);
-			}
-		}
 	}
 
 	private void UpdateLightingSpot ()
 	{
-		Collider2D[] c2d = Physics2D.OverlapCircleAll(new Vector2(transform.position.x, transform.position.y), light2D._range);
-		
-		if (c2d.Length > 0)
+		if (is2D)
 		{
-			aMin = transform.rotation.eulerAngles.z - angle;
-			aMax = transform.rotation.eulerAngles.z + angle;
-
-			for (int i = 0; i < c2d.Length; i++)
+			Collider2D[] c2d = Physics2D.OverlapCircleAll(new Vector2(transform.position.x, transform.position.y), light2D._range);
+			
+			if (c2d.Length > 0)
 			{
-				if (c2d[i].GetComponent<Block2D>() != null)
-				{
-					//angle between light and block
-					a = M9AngleHelper.GetAngle(new Vector2(transform.position.x, transform.position.y), new Vector2(c2d[i].transform.position.x, c2d[i].transform.position.y));
+				ApplySpotLight(c2d);
+			}
+		}
+		else
+		{
+			Collider[] c = Physics.OverlapSphere(new Vector3(transform.position.x, transform.position.y, 0), light2D._range);
+			
+			if (c.Length > 0)
+			{
+				ApplySpotLight(c);
+			}
+		}
+	}
+	#endregion
 
-					if ((a > aMin) && (a < aMax))
-					{
-						Block2D block = c2d[i].GetComponent<Block2D>();
-						float xd = c2d[i].transform.position.x - transform.position.x;
-						float yd = c2d[i].transform.position.y - transform.position.y;
-						int d = Mathf.RoundToInt(Mathf.Sqrt((xd*xd)+(yd*yd)));
-						
-						if (!block.LightExists(light2D._lightID))
-						{
-							block.AddLight(light2D, gameObject);
-						}
-						
-						block.SetLightValue(light2D._lightID, d);
-					}
-					else
-					{
-						Block2D block = c2d[i].GetComponent<Block2D>();
-						
-						if (!block.LightExists(light2D._lightID))
-						{
-							block.AddLight(light2D, gameObject);
-						}
-						
-						block.SetLightValue(light2D._lightID, light2D._range);
-					}
+
+	#region Light general functions.
+	private int GetDistanceToBlock (Block2D b1)
+	{
+		float xd = b1.transform.position.x - transform.position.x;
+		float yd = b1.transform.position.y - transform.position.y;
+		return Mathf.RoundToInt(Mathf.Sqrt((xd*xd)+(yd*yd)));
+	}
+
+	private void SetBlockLightValue (Block2D b1, int i1)
+	{
+		if (!b1.LightExists(light2D._lightID))
+		{
+			b1.AddLight(light2D);
+		}
+		
+		b1.SetLightValue(light2D._lightID, i1);
+	}
+
+	private void RemoveLight (Collider2D[] c1)
+	{
+		for (int i = 0; i < c1.Length; i++)
+		{
+			if (c1[i].GetComponent<Block2D>() != null)
+			{
+				Block2D block = c1[i].GetComponent<Block2D>();
+
+				if (block.LightExists(light2D._lightID))
+				{
+					block.SetLightValue(light2D._lightID, light2D._range);
+					block.RemoveLight(light2D._lightID);
 				}
 			}
 		}
 	}
+	
+	private void RemoveLight (Collider[] c1)
+	{
+		for (int i = 0; i < c1.Length; i++)
+		{
+			if (c1[i].GetComponent<Block2D>() != null)
+			{
+				Block2D block = c1[i].GetComponent<Block2D>();
+
+				if (block.LightExists(light2D._lightID))
+				{
+					c1[i].GetComponent<Block2D>().SetLightValue(light2D._lightID, light2D._range);
+					c1[i].GetComponent<Block2D>().RemoveLight(light2D._lightID);
+				}
+			}
+		}
+	}
+
+	private void RemoveStaticLight ()
+	{
+		M9Debugger.Log("Removing static light " + light2D._lightID + " at x: " + transform.position.x + " y: " + transform.position.y);
+		
+		if (is2D)
+		{
+			Collider2D[] c2d = Physics2D.OverlapCircleAll(new Vector2(transform.position.x, transform.position.y), light2D._range);
+			
+			if (c2d.Length > 0)
+			{
+				RemoveLight(c2d);
+			}
+		}
+		else
+		{
+			Collider[] c = Physics.OverlapSphere(new Vector3(transform.position.x, transform.position.y, 0), light2D._range);
+			
+			if (c.Length > 0)
+			{
+				RemoveLight(c);
+			}
+		}
+	}
+
+	private void RemoveDynamicLight ()
+	{
+		M9Debugger.Log("Removing dynamic light " + light2D._lightID + " at x: " + transform.position.x + " y: " + transform.position.y);
+		
+		if (is2D)
+		{
+			Collider2D[] c2d = Physics2D.OverlapCircleAll(new Vector2(transform.position.x, transform.position.y), light2D._range);
+			
+			if (c2d.Length > 0)
+			{
+				RemoveLight(c2d);
+			}
+		}
+		else
+		{
+			Collider[] c = Physics.OverlapSphere(new Vector3(transform.position.x, transform.position.y, 0), light2D._range);
+			
+			if (c.Length > 0)
+			{
+				RemoveLight(c);
+			}
+		}
+	}
+	#endregion
+
+	
+	#region Spot light specific functions.
+	private void ApplySpotLight (Collider2D[] c1)
+	{
+		aMin = transform.rotation.eulerAngles.z - angle;
+		aMax = transform.rotation.eulerAngles.z + angle;
+		
+		for (int i = 0; i < c1.Length; i++)
+		{
+			if (c1[i].GetComponent<Block2D>() != null)
+			{
+				Block2D block = c1[i].GetComponent<Block2D>();
+
+				a = M9AngleHelper.GetAngle(new Vector2(transform.position.x, transform.position.y), new Vector2(block.transform.position.x, block.transform.position.y));
+				
+				if ((a > aMin) && (a < aMax))
+				{
+					SetBlockLightValue(block, GetDistanceToBlock(block));
+				}
+				else
+				{
+					SetBlockLightValue(block, light2D._range);
+				}
+			}
+		}
+	}
+
+	private void ApplySpotLight (Collider[] c1)
+	{
+		aMin = transform.rotation.eulerAngles.z - angle;
+		aMax = transform.rotation.eulerAngles.z + angle;
+
+		for (int i = 0; i < c1.Length; i++)
+		{
+			if (c1[i].GetComponent<Block2D>() != null)
+			{
+				Block2D block = c1[i].GetComponent<Block2D>();
+				
+				a = M9AngleHelper.GetAngle(new Vector2(transform.position.x, transform.position.y), new Vector2(block.transform.position.x, block.transform.position.y));
+				
+				if ((a > aMin) && (a < aMax))
+				{
+					SetBlockLightValue(block, GetDistanceToBlock(block));
+				}
+			}
+		}
+	}
+	#endregion
+
+
+	#region Point light specific functions.
+	private void ApplyPointLight (Collider2D[] c1)
+	{
+		for (int i = 0; i < c1.Length; i++)
+		{
+			if (c1[i].GetComponent<Block2D>() != null)
+			{
+				Block2D block = c1[i].GetComponent<Block2D>();
+				SetBlockLightValue(block, GetDistanceToBlock(block));
+			}
+		}
+	}
+	
+	private void ApplyPointLight (Collider[] c1)
+	{
+		for (int i = 0; i < c1.Length; i++)
+		{
+			if (c1[i].GetComponent<Block2D>() != null)
+			{
+				Block2D block = c1[i].GetComponent<Block2D>();
+				SetBlockLightValue(block, GetDistanceToBlock(block));
+			}
+		}
+	}
+	#endregion
 
 }

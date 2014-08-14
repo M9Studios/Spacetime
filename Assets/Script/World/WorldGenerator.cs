@@ -8,8 +8,8 @@ public class WorldGenerator : MonoBehaviour {
 
 	private short mapWidth = WorldInformation.MAP_WIDTH;
 	private short mapHeight = WorldInformation.MAP_HEIGHT;
-	private byte trueLimit = 6, falseLimit = 4; // 6, 4
-	private float initialChance = 0.5275F; // 0.5275F
+	public byte trueLimit = 6, falseLimit = 4; // 6, 4
+	public float initialChance = 0.5275F; // 0.5275F
 	private bool newWorld = false;
 	private byte[,] WorldBlock = new byte[WorldInformation.MAP_WIDTH, WorldInformation.MAP_HEIGHT];
 
@@ -28,14 +28,11 @@ public class WorldGenerator : MonoBehaviour {
 			t1 = Time.realtimeSinceStartup;
 			SpawnRandom();
 			M9Debugger.Log("Stone spawn time: " + (Time.realtimeSinceStartup - t1));
-			
-			for (int i = 0; i < 20; i++)
-			{
-				t1 = Time.realtimeSinceStartup;
-				SmoothWorld();
-				M9Debugger.Log("Iteration " + i + " smooth time: " + (Time.realtimeSinceStartup - t1));
-			}
-			
+
+			t1 = Time.realtimeSinceStartup;
+			for (int i = 0; i < 20; i++) SmoothWorld();
+			M9Debugger.Log("Smooth time: " + (Time.realtimeSinceStartup - t1));
+
 			t1 = Time.realtimeSinceStartup;
 			SpawnOre();
 			M9Debugger.Log("Ore spawn time: " + (Time.realtimeSinceStartup - t1));

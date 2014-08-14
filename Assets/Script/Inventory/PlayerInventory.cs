@@ -1,15 +1,6 @@
 ﻿using UnityEngine;
 
-public class PlayerInventory : Inventory {
-
-	void Start ()
-	{
-	
-	}
-	
-	void Update ()
-	{
-	
-	}
-
+public class PlayerInventory : MonoBehaviour
+{
+	Inventory playerInventory = new Inventory(3, 5);
 }

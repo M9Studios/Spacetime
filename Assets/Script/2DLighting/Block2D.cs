@@ -5,6 +5,8 @@ using System.Collections.Generic;
 [AddComponentMenu("Lighting2D/Block2D")]
 public class Block2D : MonoBehaviour {
 
+	public bool is2D = false;
+
 	private float updateTime = Lighting2D.LIGHTING_UPDATE_TIME;
 
 	private List<GameObject> trackedLights = new List<GameObject>();
@@ -14,9 +16,19 @@ public class Block2D : MonoBehaviour {
 	private float newValue = 0.0F;
 	private float oldValue = 0.0F;
 
+	private float[] randomRotations = new float[] { 000.0F, 090.0F, 180.0F, 270.0F };
+
 	public void Start ()
 	{
+		transform.Rotate( new Vector3(0, 0, randomRotations[Random.Range(0, randomRotations.Length)]) );
+			
 		InvokeRepeating("UpdateLighting", updateTime, updateTime);
+	}
+
+	public void OnMouseDown ()
+	{
+		Camera.main.GetComponent<WorldBuilder>().ChangeBlock(transform.position.x, transform.position.y);
+		Destroy(gameObject);
 	}
 
 	private void UpdateLighting ()
@@ -26,7 +38,15 @@ public class Block2D : MonoBehaviour {
 
 		if (oldValue != newValue)
 		{
-			renderer.material.SetColor("_Color", new Color(newValue, newValue, newValue));
+			if (is2D)
+			{
+				renderer.material.SetColor("_Color", new Color(newValue, newValue, newValue));
+			}
+			else
+			{
+				renderer.material.color = new Color(newValue, newValue, newValue, 1);
+			}
+
 			oldValue = newValue;
 		}
 	}
@@ -132,7 +152,7 @@ public class Block2D : MonoBehaviour {
 		}
 		else
 		{
-			M9Debugger.LogWarning("No lights to remove.");
+			//M9Debugger.LogWarning("No lights to remove.");
 			return;
 		}
 
@@ -145,6 +165,7 @@ public class Block2D : MonoBehaviour {
 		{
 			if (l._lightID == i1) return true;
 		}
+
 		return false;
 	}
 
